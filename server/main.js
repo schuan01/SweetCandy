@@ -3,6 +3,7 @@ var app = express();
 var server = require('http').Server(app);  
 var io = require('socket.io')(server);
 
+app.set('port', (process.env.PORT || 5000));
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
 var server_bd_port = process.env.OPENSHIFT_MYSQL_DB_PORT || 3306
@@ -145,9 +146,8 @@ socket.on('getcercanos', function(data) {
 });
 
 //------------------------------------------------------------------
-server.listen(server_port, server_ip_address, function(){
-  console.log(process.env.OPENSHIFT_NODEJS_PORT);
-  console.log("\nListening on " + server_ip_address + ", server_port " + server_port)
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
 });
  
 
