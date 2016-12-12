@@ -5,7 +5,7 @@ var io = require('socket.io')(server);
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
-var server_bd_port = process.env.OPENSHIFT_MYSQL_DB_PORT || 3333
+var server_bd_port = process.env.OPENSHIFT_MYSQL_DB_PORT || 3306
 var server_bd = process.env.OPENSHIFT_MYSQL_DB_HOST || '127.0.0.1'
 var server_user = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'schuan'
 var server_pwd = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '45813070'
