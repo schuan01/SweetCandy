@@ -5,12 +5,17 @@ var io = require('socket.io')(server);
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+var server_bd_port = process.env.OPENSHIFT_MYSQL_DB_PORT || 3333
+var server_bd = process.env.OPENSHIFT_MYSQL_DB_HOST || '127.0.0.1'
+var server_user = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'schuan'
+var server_pwd = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '45813070'
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : 'admin',
+  host     : server_bd,
+  port     : server_bd_port,
+  user     : server_user,
+  password : server_pwd,
   database : 'testnode'
 });
 
