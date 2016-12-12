@@ -146,9 +146,10 @@ socket.on('getcercanos', function(data) {
 
 //------------------------------------------------------------------
 server.listen(server_port, server_ip_address, function(){
-  console.log("Listening on " + server_ip_address + ", server_port " + server_port)
+  console.log(process.env.OPENSHIFT_NODEJS_PORT);
+  console.log("\nListening on " + server_ip_address + ", server_port " + server_port)
 });
-
+ 
 
 
 //------------------------------ CALCULO DE CERCANOS -----------------
