@@ -1,0 +1,17 @@
+{
+  "name": "sweetcandyproject",
+  "version": "1.0.0",
+  "main": "server/main.js",
+  "scripts": {
+    "start": "main.js"
+  },
+  "author": "Juan Volpe",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "mysql": "^2.12.0",
+    "socket.io": "^1.7.1"
+  },
+  "devDependencies": {},
+  "description": ""
+}
