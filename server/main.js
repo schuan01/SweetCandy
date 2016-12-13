@@ -1,9 +1,9 @@
 var express = require('express');  
 var app = express();  
 var server = require('http').Server(app);  
-var io = require('socket.io')(server);
+var io = require('socket.io').listen(server);
 
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (process.env.PORT || 3000));
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 var server_bd_port = 3306;
@@ -104,7 +104,7 @@ app.get('/test', function(req, res) {
 });
 
 
-io.on('connection', function(socket) {
+io.sockets.on('connection', function(socket) {
   var address = socket.request.connection.remoteAddress;
   console.log('Nueva conexion desde ' + address);
   //emitimos el array de empleados para que lo tome el cliente
