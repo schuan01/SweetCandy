@@ -11,9 +11,50 @@ var server_bd = 'us-cdbr-iron-east-04.cleardb.net';
 var server_user = 'b16fa9963b6b69';
 var server_pwd = '5080d557';
 
+var db_config = {
+  host     : server_bd,
+  port     : server_bd_port,
+  user     : server_user,
+  password : server_pwd,
+  database : 'heroku_85b15da8dca88f7'
+};
 
+var connection;
 var mysql      = require('mysql');
-var connection = mysql.createConnection({
+
+function handleDisconnect() {
+  connection = mysql.createConnection(db_config); // Recreate the connection, since
+                                                  // the old one cannot be reused.
+
+  connection.connect(function(err) {              // The server is either down
+    if(err) {                                     // or restarting (takes a while sometimes).
+      console.log('Error al conectar BD:', err);
+      setTimeout(handleDisconnect, 2000); // We introduce a delay before attempting to reconnect,
+										  // process asynchronous requests in the meantime.
+										  // to avoid a hot loop, and to allow our node script to
+										  // If you're also serving http, display a 503 error.
+    }
+	else
+	{
+		console.log('Conectado exitosamente a la BD con ID ' + connection.threadId);	
+	}
+	
+
+  });                                     
+                                          
+  connection.on('error', function(err) {
+    console.log('Error en BD', err);
+    if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+      handleDisconnect();                         // lost due to either server restart, or a
+    } else {                                      // connnection idle timeout (the wait_timeout
+      throw err;                                  // server variable configures this)
+    }
+  });
+}
+
+//handleDisconnect();
+
+/*var connection = mysql.createConnection({
   host     : server_bd,
   port     : server_bd_port,
   user     : server_user,
@@ -27,8 +68,8 @@ connection.connect(function(err) {
     return;
   }
 
-  console.log('Conectado exitosamente a la BD con ID ' + connection.threadId);
-});
+  
+});*/
 
 
 var empleadosCercanos = [];
@@ -75,6 +116,7 @@ io.on('connection', function(socket) {
 //-----------------------------------------------------------------
 //NUEVO EMPLEADO CREADO
 socket.on('nuevoempleado', function(data) {
+	handleDisconnect();
     //LE SACAMOS EL ID
     data.id = null;
     var creadoCorrectamente = false;
@@ -87,6 +129,8 @@ socket.on('nuevoempleado', function(data) {
       console.log(data);
       io.sockets.emit('empleadocreado', data);
     });
+	
+	connection.end();
     
   });
 
@@ -112,7 +156,8 @@ socket.on('setubacionempleado', function(data) {
 
 
 //LOGIN EMPLEADO
-socket.on('loginempleado', function(data) {   
+socket.on('loginempleado', function(data) {
+	handleDisconnect();
     connection.query('SELECT * FROM empleado WHERE email = ? and password = ?',[data.email,data.password], function(error, results, fields) {
       if (error) throw error;
       if(results.length == 0)
@@ -130,6 +175,8 @@ socket.on('loginempleado', function(data) {
       }
       
     });
+	
+	connection.end();
 });
 
 //OBTIENE LOS EMPLEADOS CONECTADOS
@@ -148,7 +195,7 @@ socket.on('getcercanos', function(data) {
 
 //------------------------------------------------------------------
 app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+  console.log('Aplicacion corriendo en: ', app.get('port'));
 });
  
 
