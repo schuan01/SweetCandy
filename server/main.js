@@ -1,11 +1,12 @@
-var express = require('express');  
-var app = express();  
-var server = require('http').createServer(app);  
-var io = require('socket.io')({transports: ['xhr-polling'],transports:[ 'websocket' ]}).listen(server);
+var PORT = process.env.PORT || 3000;
+var express = require('express');
+var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
-app.set('port', (process.env.PORT || 3000));
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+app.use(express.static(__dirname + '/public'));
+
+//app.set('port', (process.env.PORT || 3000));
 var server_bd_port = 3306;
 var server_bd = 'us-cdbr-iron-east-04.cleardb.net';
 var server_user = 'b16fa9963b6b69';
@@ -23,8 +24,8 @@ var db_config = {
 }; 
 
 //------------------------------------------------------------------
-app.listen(app.get('port'), function() {
-  console.log('Aplicacion corriendo en: ', app.get('port'));
+http.listen(PORT, function() {
+  console.log('Aplicacion corriendo en: ', PORT);
 });
 
 function handleDisconnect() {
