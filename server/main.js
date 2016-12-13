@@ -11,6 +11,9 @@ var server_bd = 'us-cdbr-iron-east-04.cleardb.net';
 var server_user = 'b16fa9963b6b69';
 var server_pwd = '5080d557';
 
+var connection;
+var mysql      = require('mysql');
+
 var db_config = {
   host     : server_bd,
   port     : server_bd_port,
@@ -19,8 +22,16 @@ var db_config = {
   database : 'heroku_85b15da8dca88f7'
 };
 
-var connection;
-var mysql      = require('mysql');
+
+
+// Heroku setting for long polling
+io.set("transports", ["xhr-polling"]); 
+io.set("polling duration", 10); 
+
+//------------------------------------------------------------------
+app.listen(app.get('port'), function() {
+  console.log('Aplicacion corriendo en: ', app.get('port'));
+});
 
 function handleDisconnect() {
   connection = mysql.createConnection(db_config); // Recreate the connection, since
@@ -193,10 +204,7 @@ socket.on('getcercanos', function(data) {
   
 });
 
-//------------------------------------------------------------------
-app.listen(app.get('port'), function() {
-  console.log('Aplicacion corriendo en: ', app.get('port'));
-});
+
  
 
 
