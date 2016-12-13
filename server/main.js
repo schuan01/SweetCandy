@@ -16,6 +16,7 @@ var connection;
 var mysql      = require('mysql');
 
 var db_config = {
+  connectionLimit : 10,
   host     : server_bd,
   port     : server_bd_port,
   user     : server_user,
@@ -28,8 +29,12 @@ http.listen(PORT, function() {
   console.log('Aplicacion corriendo en: ', PORT);
 });
 
-function handleDisconnect() {
-  connection = mysql.createConnection(db_config); // Recreate the connection, since
+//Creamos el pool de la BD
+var pool = mysql.createPool(db_config);
+
+
+/*function handleDisconnect() {
+  connection = mysql.createPool(db_config); // Recreate the connection, since
                                                   // the old one cannot be reused.
 
   connection.connect(function(err) {              // The server is either down
@@ -56,26 +61,9 @@ function handleDisconnect() {
       throw err;                                  // server variable configures this)
     }
   });
-}
+}*/
 
 //handleDisconnect();
-
-/*var connection = mysql.createConnection({
-  host     : server_bd,
-  port     : server_bd_port,
-  user     : server_user,
-  password : server_pwd,
-  database : 'heroku_85b15da8dca88f7'
-});
-
-connection.connect(function(err) {
-  if (err) {
-    console.error('Error al conectar BD: ' + err.stack);
-    return;
-  }
-
-  
-});*/
 
 
 var empleadosCercanos = [];
@@ -122,19 +110,23 @@ io.on('connection', function(socket) {
 //-----------------------------------------------------------------
 //NUEVO EMPLEADO CREADO
 socket.on('nuevoempleado', function(data) {
-	handleDisconnect();
+	//handleDisconnect();
     //LE SACAMOS EL ID
     data.id = null;
     var creadoCorrectamente = false;
-    connection.query('INSERT INTO empleado SET ?', data, function(err, result) {
-      if (err) throw err;
+    pool.getConnection(function(err, connection) {
+        if (err) throw err;
+        connection.query('INSERT INTO empleado SET ?', data, function(err1, result) {
+          if (err1) throw err1;
+          connection.release();
 
-      console.log("Empleado insertado a BD correctamente");
-      data.id = result.insertId;//Le ponemos el ID
-      empleadosConectados.push(data);//Lo agregamos a la lista de conectados POR AHORA
-      console.log(data);
-	  connection.end();
-      io.sockets.emit('empleadocreado', data);
+          console.log("Empleado insertado a BD correctamente");
+          data.id = result.insertId;//Le ponemos el ID
+          empleadosConectados.push(data);//Lo agregamos a la lista de conectados POR AHORA
+          console.log(data);
+        
+          io.sockets.emit('empleadocreado', data);
+        });
     });
 	
 	
@@ -164,25 +156,30 @@ socket.on('setubacionempleado', function(data) {
 
 //LOGIN EMPLEADO
 socket.on('loginempleado', function(data) {
-	handleDisconnect();
-    connection.query('SELECT * FROM empleado WHERE email = ? and password = ?',[data.email,data.password], function(error, results, fields) {
-      if (error) throw error;
-      if(results.length == 0)
-      {
-		connection.end();
-        io.sockets.emit('usuariologeado', null);
-      }
-      else
-      {
-        for (var i in results) 
-        {
-		  connection.end();
-          empleadosConectados.push(results[i]);//Lo agregamos a la lista
-          io.sockets.emit('usuariologeado', results[i]);
+	//handleDisconnect();
+  pool.getConnection(function(err, connection) {
+        if (err) throw err;
+        connection.query('SELECT * FROM empleado WHERE email = ? and password = ?',[data.email,data.password], function(error, results, fields) {
+          if (error) throw error;
+          connection.release();
           
-        }     
-      }
-      
+          if(results.length == 0)
+          {
+        
+            io.sockets.emit('usuariologeado', null);
+          }
+          else
+          {
+            for (var i in results) 
+            {
+          
+              empleadosConectados.push(results[i]);//Lo agregamos a la lista
+              io.sockets.emit('usuariologeado', results[i]);
+              
+            }     
+          }
+          
+        });
     });
 	
 	
