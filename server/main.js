@@ -6,10 +6,11 @@ var io = require('socket.io')(server);
 app.set('port', (process.env.PORT || 5000));
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
-var server_bd_port = process.env.OPENSHIFT_MYSQL_DB_PORT || 3306
-var server_bd = process.env.OPENSHIFT_MYSQL_DB_HOST || '127.0.0.1'
-var server_user = process.env.OPENSHIFT_MYSQL_DB_USERNAME || 'schuan'
-var server_pwd = process.env.OPENSHIFT_MYSQL_DB_PASSWORD || '45813070'
+var server_bd_port = 3306
+var server_bd = 'us-cdbr-iron-east-04.cleardb.net'
+var server_user 'b16fa9963b6b69'
+var server_pwd = '5080d557'
+
 
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
@@ -17,7 +18,7 @@ var connection = mysql.createConnection({
   port     : server_bd_port,
   user     : server_user,
   password : server_pwd,
-  database : 'testnode'
+  database : 'heroku_85b15da8dca88f7'
 });
 
 connection.connect(function(err) {
