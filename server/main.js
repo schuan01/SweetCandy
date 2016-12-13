@@ -1,7 +1,7 @@
 var express = require('express');  
 var app = express();  
 var server = require('http').createServer(app);  
-var io = require('socket.io').listen(server);
+var io = require('socket.io')({transports: ['xhr-polling'],transports:[ 'websocket' ]}).listen(server);
 
 app.set('port', (process.env.PORT || 3000));
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
