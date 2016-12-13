@@ -1,6 +1,6 @@
 var express = require('express');  
 var app = express();  
-var server = require('http').Server(app);  
+var server = require('http').createServer(app);  
 var io = require('socket.io').listen(server);
 
 app.set('port', (process.env.PORT || 3000));
@@ -20,13 +20,7 @@ var db_config = {
   user     : server_user,
   password : server_pwd,
   database : 'heroku_85b15da8dca88f7'
-};
-
-
-
-// Heroku setting for long polling
-io.set("transports", ["xhr-polling"]); 
-io.set("polling duration", 10); 
+}; 
 
 //------------------------------------------------------------------
 app.listen(app.get('port'), function() {
@@ -108,14 +102,14 @@ var empleadosConectados = [{
   password: "12345" 
 }];
 
-app.use(express.static('public'));
+//app.use(express.static('public'));
 
 app.get('/test', function(req, res) {  
   res.status(200).send("Server Online");
 });
 
 
-io.sockets.on('connection', function(socket) {
+io.on('connection', function(socket) {
   var address = socket.request.connection.remoteAddress;
   console.log('Nueva conexion desde ' + address);
   //emitimos el array de empleados para que lo tome el cliente
