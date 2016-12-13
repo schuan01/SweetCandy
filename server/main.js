@@ -67,29 +67,7 @@ var pool = mysql.createPool(db_config);
 
 
 var empleadosCercanos = [];
-var empleadosConectados = [{  
-  id: 1,
-  usuario: "Soy un empleado de ejemplo",
-  descripcion : "Descripcion Ejemplo",
-  rating: 4.5,
-  edad: 25,
-  costo: 100,
-  latitud: -34.893393,
-  longitud: -56.171873,
-  email: "test@test.com",
-  password: "12345" 
-},{  
-  id: 2,
-  usuario: "Soy un empleado de ejemplo 2",
-  descripcion : "Descripcion Ejemplo 2",
-  rating: 4.5,
-  edad: 25,
-  costo: 100,
-  latitud: -32.694151,
-  longitud: -58.017911,
-  email: "test@test.com",
-  password: "12345" 
-}];
+var empleadosConectados = [];
 
 //app.use(express.static('public'));
 
@@ -162,7 +140,7 @@ socket.on('loginempleado', function(data) {
         connection.query('SELECT * FROM empleado WHERE email = ? and password = ?',[data.email,data.password], function(error, results, fields) {
           if (error) throw error;
           connection.release();
-          
+
           if(results.length == 0)
           {
         
