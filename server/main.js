@@ -133,10 +133,11 @@ socket.on('nuevoempleado', function(data) {
       data.id = result.insertId;//Le ponemos el ID
       empleadosConectados.push(data);//Lo agregamos a la lista de conectados POR AHORA
       console.log(data);
+	  connection.end();
       io.sockets.emit('empleadocreado', data);
     });
 	
-	connection.end();
+	
     
   });
 
@@ -167,13 +168,15 @@ socket.on('loginempleado', function(data) {
     connection.query('SELECT * FROM empleado WHERE email = ? and password = ?',[data.email,data.password], function(error, results, fields) {
       if (error) throw error;
       if(results.length == 0)
-      { 
+      {
+		connection.end();
         io.sockets.emit('usuariologeado', null);
       }
       else
       {
         for (var i in results) 
         {
+		  connection.end();
           empleadosConectados.push(results[i]);//Lo agregamos a la lista
           io.sockets.emit('usuariologeado', results[i]);
           
@@ -182,7 +185,7 @@ socket.on('loginempleado', function(data) {
       
     });
 	
-	connection.end();
+	
 });
 
 //OBTIENE LOS EMPLEADOS CONECTADOS
