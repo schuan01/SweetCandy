@@ -43,12 +43,15 @@ app.get('/test', function(req, res) {
 app.get('/getLoc', function(req, res) {  
   fs.readFile('../public/get_loc.html', function (err, html) {
     if (err) {
-        throw err; 
+        res.status(200).send(err); 
     }
+    else
+    {
 
-    res.writeHeader(200, {"Content-Type": "text/html"});  
-    res.write(html);  
-    res.end();  
+      res.writeHeader(200, {"Content-Type": "text/html"});  
+      res.write(html);  
+      res.end();
+    }  
   });
 });
 
