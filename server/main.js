@@ -14,6 +14,7 @@ var server_pwd = '5080d557';
 
 var connection;
 var mysql      = require('mysql');
+var pool = null;
 
 var db_config = {
   connectionLimit : 10,
@@ -22,7 +23,14 @@ var db_config = {
   user     : server_user,
   password : server_pwd,
   database : 'heroku_85b15da8dca88f7'
-}; 
+};
+
+var db_config_local = {
+  host     : 'localhost',
+  user     : 'root',
+  password : 'admin',
+  database : 'testnode'
+};    
 
 //------------------------------------------------------------------
 http.listen(PORT, function() {
@@ -30,7 +38,14 @@ http.listen(PORT, function() {
 });
 
 //Creamos el pool de la BD
-var pool = mysql.createPool(db_config);
+if(PORT == 3000)
+{
+  pool = mysql.createPool(db_config_local);
+}
+else
+{
+  pool = mysql.createPool(db_config);
+}
 
 var empleadosCercanos = [];
 var empleadosConectados = [];
@@ -123,7 +138,7 @@ socket.on('desconectarUsuario', function(data) {
   }
 
   //Mandamos los usuarios que quedan
-  console.log("Usuarios Conectados: " + empleadosConectados.size);
+  console.log("Usuarios Conectados: " + empleadosConectados.length);
   socket.broadcast.emit('conectados',empleadosConectados);
     
 });
@@ -150,7 +165,7 @@ socket.on('loginempleado', function(data) {
             {
           
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
-              console.log("Usuarios Conectados: " + empleadosConectados.size);
+              console.log("Usuarios Conectados: " + empleadosConectados.length);
               io.sockets.emit('usuariologeado', results[i]);
               
             }     
@@ -170,7 +185,10 @@ socket.on('conectados', function(data) {
 
 //OBTIENE LOS EMPLEADOS CERCANOS
 socket.on('getcercanos', function(data) {
-    GetCercanos(data.latitud,data.longitud,data.limite);
+    if(empleadosConectados.length > 0)
+    {
+      GetCercanos(data.latitud,data.longitud,data.limite);
+    }
     socket.emit('empleadoscercanos', empleadosCercanos);
   });
   
