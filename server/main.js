@@ -52,10 +52,6 @@ app.get('/getLoc', function(req, res) {
   });
 });
 
-response.writeHeader(200, {"Content-Type": "text/html"});  
-        response.write(html);  
-        response.end();  
-
 
 io.on('connection', function(socket) {
   var address = socket.request.connection.remoteAddress;
