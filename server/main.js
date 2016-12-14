@@ -109,6 +109,25 @@ socket.on('setubacionempleado', function(data) {
     
 });
 
+//DESCONECTAMOS AL USUARIO DEL SERVIDOR
+socket.on('desconectarUsuario', function(data) {
+
+  for (var i=0;i< empleadosConectados.length;i++) 
+  {
+          if(empleadosConectados[i].id == data.id)
+          {
+            delete empleadosConectados[i];//Sacamos el usuario de conectados
+            break;
+          }
+
+  }
+
+  //Mandamos los usuarios que quedan
+  console.log("Usuarios Conectados: " + empleadosConectados.size);
+  socket.broadcast.emit('conectados',empleadosConectados);
+    
+});
+
 
 
 //LOGIN EMPLEADO
@@ -131,6 +150,7 @@ socket.on('loginempleado', function(data) {
             {
           
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
+              console.log("Usuarios Conectados: " + empleadosConectados.size);
               io.sockets.emit('usuariologeado', results[i]);
               
             }     

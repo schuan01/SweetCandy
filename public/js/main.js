@@ -13,4 +13,4 @@ socket.on('conectados', function(data) {
           map: map
         });
   }
-})
+});
