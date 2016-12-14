@@ -1,27 +1,16 @@
-var socket = io.connect('http://localhost:8080', { 'forceNew': true });
+var socket = io.connect('https://warm-basin-61084.herokuapp.com', { 'forceNew': true });
 
-socket.on('messages', function(data) {  
-  console.log(data);
-  render(data);
+socket.on('conectados', function(data) {  
+  for(var i = 0; i < data.length; i++) {
+	var obj = data[i];
+	var uluru = {lat: obj.latitud, lng: obj.longitud};
+    var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 4,
+          center: uluru
+        });
+    var marker = new google.maps.Marker({
+          position: uluru,
+          map: map
+        });
+  }
 })
-
-function render (data) {  
-  var html = data.map(function(elem, index) {//Itereacion 
-    return(`<div>
-              <strong>${elem.author}</strong>:
-              <em>${elem.text}</em>
-            </div>`);
-  }).join(" ");
-
-  document.getElementById('messages').innerHTML = html;
-}
-
-function addMessage(e) {  
-  var message = {
-    author: document.getElementById('username').value,
-    text: document.getElementById('texto').value
-  };
-
-  socket.emit('new-message', message);//Emitimos el msj
-  return false;
-}
