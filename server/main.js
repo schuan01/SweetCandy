@@ -5,9 +5,8 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
 
-app.use(express.static(__dirname + '/public'));
-
-//app.set('port', (process.env.PORT || 3000));
+app.use(express.static(__dirname + '/../public'));//Aplica como estaticos los archivos de la carpeta publica
+                                                  //Pongo los /../ para acceder a la raiz
 var server_bd_port = 3306;
 var server_bd = 'us-cdbr-iron-east-04.cleardb.net';
 var server_user = 'b16fa9963b6b69';
