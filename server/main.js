@@ -41,7 +41,7 @@ app.get('/test', function(req, res) {
 });
 
 app.get('/getLoc', function(req, res) {  
-  fs.readFile('../public/get_loc.html', function (err, html) {
+  fs.readFile('./public/get_loc.html', function (err, html) {
     if (err) {
         res.status(200).send(err); 
     }
