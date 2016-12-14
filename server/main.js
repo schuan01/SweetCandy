@@ -131,13 +131,14 @@ socket.on('desconectarUsuario', function(data) {
   {
           if(empleadosConectados[i].id == data.id)
           {
-            delete empleadosConectados[i];//Sacamos el usuario de conectados
+            empleadosConectados.splice(i, 1);//Sacamos el usuario de conectados
             break;
           }
 
   }
 
   //Mandamos los usuarios que quedan
+   console.log("Usuario desconectado");
   console.log("Usuarios Conectados: " + empleadosConectados.length);
   socket.broadcast.emit('conectados',empleadosConectados);
     
@@ -165,6 +166,7 @@ socket.on('loginempleado', function(data) {
             {
           
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
+              console.log("Nuevo usuario logeado");
               console.log("Usuarios Conectados: " + empleadosConectados.length);
               io.sockets.emit('usuariologeado', results[i]);
               
