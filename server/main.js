@@ -125,7 +125,22 @@ socket.on('setubacionempleado', function(data) {
 });
 
 //DESCONECTAMOS AL USUARIO DEL SERVIDOR
-socket.on('desconectarUsuario', function(data) {
+socket.on('conectarusuario', function(data) {
+
+  if(data != null)
+  {
+    empleadosConectados.push(data);
+  }
+
+  //Mandamos los usuarios que quedan
+  console.log("Usuario conectado");
+  console.log("Usuarios Conectados: " + empleadosConectados.length);
+  socket.broadcast.emit('conectados',empleadosConectados);
+    
+});
+
+//DESCONECTAMOS AL USUARIO DEL SERVIDOR
+socket.on('desconectarusuario', function(data) {
 
   for (var i=0;i< empleadosConectados.length;i++) 
   {
