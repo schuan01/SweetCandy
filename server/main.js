@@ -267,6 +267,7 @@ socket.on('aceptarsolicitud', function(data) {
           {
             //LE SACAMOS EL ID
             data[i].id = null;
+            data[i].fechaInicioTransaccion = new Date();
 
             var idTran = 0;
             
@@ -279,33 +280,6 @@ socket.on('aceptarsolicitud', function(data) {
                   data[i].id = result.insertId;//Le ponemos el ID
                   idTran = result.insertId;
                   console.log("Transaccion creada con ID: " + data[i].id);
-                
-                
-                  
-                });
-            });
-
-             pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query('SELECT fechaInicioTransaccion FROM transaccion WHERE id = ?', idTran, function(err1, result) {
-                  if (err1) throw err1;
-                  connection.release();
-                  
-                  if(result.length == 0)
-                  {
-                
-                    throw new Exception("No existe la transaccion");
-                  }
-                  else
-                  {
-                    for (var x in result) 
-                    {
-                      console.log("Transaccion encontrada con fecha Inicio: " +  result[x].fechaInicioTransaccion)
-                      data[i].fechaInicioTransaccion = result[x].fechaInicioTransaccion;
-                      break;
-                      
-                    }     
-                  }
                 
                 
                   
