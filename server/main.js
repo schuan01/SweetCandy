@@ -82,10 +82,9 @@ io.on('connection', function(socket) {
 //-----------------------------------------------------------------
 //NUEVO EMPLEADO CREADO
 socket.on('nuevoempleado', function(data) {
-	//handleDisconnect();
+	
     //LE SACAMOS EL ID
     data.id = null;
-    var creadoCorrectamente = false;
     pool.getConnection(function(err, connection) {
         if (err) throw err;
         connection.query('INSERT INTO empleado SET ?', data, function(err1, result) {
@@ -154,7 +153,7 @@ socket.on('desconectarusuario', function(data) {
 
   //Mandamos los usuarios que quedan
    console.log("Usuario desconectado");
-  console.log("Usuarios Conectados: " + empleadosConectados.length);
+  console.log("Usuarios conectados ahora: " + empleadosConectados.length);
   socket.broadcast.emit('conectados',empleadosConectados);
     
 });
@@ -163,7 +162,6 @@ socket.on('desconectarusuario', function(data) {
 
 //LOGIN EMPLEADO
 socket.on('loginempleado', function(data) {
-	//handleDisconnect();
   pool.getConnection(function(err, connection) {
         if (err) throw err;
         connection.query('SELECT * FROM empleado WHERE email = ? and password = ?',[data.email,data.password], function(error, results, fields) {
@@ -182,7 +180,7 @@ socket.on('loginempleado', function(data) {
           
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
               console.log("Nuevo usuario logeado");
-              console.log("Usuarios Conectados: " + empleadosConectados.length);
+              console.log("Usuarios conectados ahora: " + empleadosConectados.length);
               io.sockets.emit('usuariologeado', results[i]);
               
             }     
@@ -208,8 +206,66 @@ socket.on('getcercanos', function(data) {
     }
     socket.emit('empleadoscercanos', empleadosCercanos);
   });
+
+  //ENVIAR SOLICITUD BUSQUEDA
+  socket.on('buscardisponible', function(data) {
+    if(data != null)
+    {
+      console.log("El cliente " + data.id + " buscando un servicio")
+      socket.broadcast.emit('solicitudcliente',data);
+      
+    }
+ });
+
+ //ACEPTAR SOLICITUD BUSQUEDA
+socket.on('aceptarsolicitud', function(data) {
+    if(data != null)
+    {
+      console.log("Solicitud aceptada para el usuario " + data.id);
+    }
+ });
+//------------ TRANSACCIONES --------------------
+//INICIAR TRANSACCION
+socket.on('iniciartransaccion', function(data) {
+
+   //LE SACAMOS EL ID
+    data.id = null;
+
+    pool.getConnection(function(err, connection) {
+        if (err) throw err;
+        connection.query('INSERT INTO transaccion SET ?', data, function(err1, result) {
+          if (err1) throw err1;
+          connection.release();
+
+          console.log("Transaccion creada");
+          data.id = result.insertId;//Le ponemos el ID
+          console.log(data);
+        
+          io.sockets.emit('iniciartransaccion', data);//Devolvemos la transaccion
+        });
+    });
+    
+  });
+//FINALIZAR TRANSACCION
+socket.on('finalizartransaccion', function(data) {
+
+    pool.getConnection(function(err, connection) {
+        if (err) throw err;
+        connection.query('UPDATE transaccion SET fechaFinTransaccion = ?, isActiva = ? where id = ?', [data.fechaFinTransaccion,data.isActiva,data.id], function(err1, result) {
+          if (err1) throw err1;
+          connection.release();
+
+          console.log("Transaccion finalizada");
+          console.log(data);
+        
+          io.sockets.emit('finalizartransaccion', data);//Devolvemos la transaccion
+        });
+    });
+    
+  });
+//---------- FIN TRANSACCIONES ------------------  
   
-});
+});//---TERMINA CONNECTION ------------
 
 
  
