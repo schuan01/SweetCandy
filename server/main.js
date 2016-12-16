@@ -272,6 +272,7 @@ socket.on('aceptarsolicitud', function(data) {
             var idTran = 0;
             
             console.log("Creando transaccion");
+            console.log(data[i]);
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query('INSERT INTO transaccion SET ?', data[i], function(err1, result) {
