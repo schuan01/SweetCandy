@@ -117,13 +117,33 @@ socket.on('setubacionempleado', function(data) {
           }
 
   }
-
-  //Se lo mandamos a todos los usuarios
-  socket.broadcast.emit('conectados',empleadosConectados);
     
 });
 
-//DESCONECTAMOS AL USUARIO DEL SERVIDOR
+//CAMBIA EL ESTADO DEL USUARIO
+socket.on('cambiarestado', function(data) {
+
+  for (var i=0;i< empleadosConectados.length;i++) 
+  {
+          if(empleadosConectados[i].id == data.id)
+          {
+            if(empleadosConectados[i].isOnline)
+            {
+              empleadosConectados[i].isOnline = false//Lo cambiamos a False
+            }
+            else
+            {
+              empleadosConectados[i].isOnline = true//Lo cambiamos a True
+            }
+            break;
+          }
+
+  }
+
+    
+});
+
+//CONECTAMOS AL USUARIO DEL SERVIDOR
 socket.on('conectarusuario', function(data) {
 
   if(data != null)
@@ -133,8 +153,7 @@ socket.on('conectarusuario', function(data) {
 
   //Mandamos los usuarios que quedan
   console.log("Usuario conectado");
-  console.log("Usuarios Conectados: " + empleadosConectados.length);
-  socket.broadcast.emit('conectados',empleadosConectados);
+  console.log("Usuarios conectados ahora: " + empleadosConectados.length);
     
 });
 
@@ -154,7 +173,6 @@ socket.on('desconectarusuario', function(data) {
   //Mandamos los usuarios que quedan
    console.log("Usuario desconectado");
   console.log("Usuarios conectados ahora: " + empleadosConectados.length);
-  socket.broadcast.emit('conectados',empleadosConectados);
     
 });
 
@@ -208,7 +226,7 @@ socket.on('getcercanos', function(data) {
   });
 
   //ENVIAR SOLICITUD BUSQUEDA
-  socket.on('buscardisponible', function(data) {
+socket.on('buscardisponible', function(data) {
     if(data != null)
     {
       console.log("El cliente " + data.id + " buscando un servicio")
@@ -219,9 +237,85 @@ socket.on('getcercanos', function(data) {
 
  //ACEPTAR SOLICITUD BUSQUEDA
 socket.on('aceptarsolicitud', function(data) {
-    if(data != null)
+    if(data != null || data.length > 0)//data es un array(trae cliente aceptado/empleado aceptador/Transaccion)
     {
-      console.log("Solicitud aceptada para el usuario " + data.id);
+
+      for (var i=0;i< data.length;i++) 
+      {
+          if(data[i].tipo == "Empleado")
+          {
+            console.log("Solicitud aceptada por Empleado " + data[i].usuario);
+
+            for (var j=0;j< empleadosConectados.length;j++) 
+            {
+              if(empleadosConectados[j].id == data[i].id)
+              {
+
+                empleadosConectados[j].isOnline = false//Lo cambiamos a False siempre que acepta la solicitud
+                break;
+              }
+
+            }
+          }
+
+          if(data[i].tipo == "Cliente")
+          {
+            console.log("Solicitud aceptada para el Cliente " + data[i].usuario);
+          }
+
+          if(data[i].tipo == "Transaccion")
+          {
+            //LE SACAMOS EL ID
+            data[i].id = null;
+
+            var idTran = 0;
+            
+            console.log("Creando transaccion");
+            pool.getConnection(function(err, connection) {
+                if (err) throw err;
+                connection.query('INSERT INTO transaccion SET ?', data[i], function(err1, result) {
+                  if (err1) throw err1;
+                  connection.release();
+                  data[i].id = result.insertId;//Le ponemos el ID
+                  idTran = result.insertId;
+                  console.log("Transaccion creada con ID: " + data[i].id);
+                
+                
+                  
+                });
+            });
+
+             pool.getConnection(function(err, connection) {
+                if (err) throw err;
+                connection.query('SELECT fechaInicioTransaccion FROM transaccion WHERE id = ?', idTran, function(err1, result) {
+                  if (err1) throw err1;
+                  connection.release();
+                  
+                  if(result.length == 0)
+                  {
+                
+                    throw new Exception("No existe la transaccion");
+                  }
+                  else
+                  {
+                    for (var x in result) 
+                    {
+                      console.log("Transaccion encontrada con fecha Inicio: " +  result[x].fechaInicioTransaccion)
+                      data[i].fechaInicioTransaccion = result[x].fechaInicioTransaccion;
+                      break;
+                      
+                    }     
+                  }
+                
+                
+                  
+                });
+            });
+
+            io.sockets.emit('iniciartransaccion', data[i]);//Devolvemos la transaccion
+
+          }
+      }
     }
  });
 //------------ TRANSACCIONES --------------------
