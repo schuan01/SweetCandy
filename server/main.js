@@ -267,26 +267,24 @@ socket.on('aceptarsolicitud', function(data) {
           {
             //LE SACAMOS EL ID
             data[i].id = null;
-            data[i].fechaInicioTransaccion = new Date();
-
-            var idTran = 0;
+            var empleadoTr = data[i].empleadoTransaccion;
+            var clienteTr = data[i].clienteTransaccion;
+            var activoTr = data[i].isActiva;
+            var totalTr = data[i].totalTransaccion;
+            var idTr = data[i].id;
             
             console.log("Creando transaccion");
-            console.log(data[i]);
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
-                connection.query('INSERT INTO transaccion SET ?', data[i], function(err1, result) {
+                connection.query('INSERT INTO transaccion SET empleadoTransaccion = ?,clienteTransaccion = ?,fechaInicioTransaccion = now(),isActiva = ?,totalTransaccion = ?', [empleadoTr,clienteTr,activoTr,totalTr], function(err1, result) {
                   if (err1) throw err1;
                   connection.release();
-                  data[i].id = result.insertId;//Le ponemos el ID
-                  idTran = result.insertId;
-                  console.log("Transaccion creada con ID: " + data[i].id);
-                
-                
-                  
+                  idTr = result.insertId;//Le ponemos el ID
+                  console.log("Transaccion creada con ID: " + idTr);  
                 });
             });
 
+            data[i].id = idTr;
             io.sockets.emit('iniciartransaccion', data[i]);//Devolvemos la transaccion
 
           }
@@ -320,12 +318,11 @@ socket.on('finalizartransaccion', function(data) {
 
     pool.getConnection(function(err, connection) {
         if (err) throw err;
-        connection.query('UPDATE transaccion SET fechaFinTransaccion = ?, isActiva = ? where id = ?', [data.fechaFinTransaccion,data.isActiva,data.id], function(err1, result) {
+        connection.query('UPDATE transaccion SET fechaFinTransaccion = now(), isActiva = ? where id = ?', [data.isActiva,data.id], function(err1, result) {
           if (err1) throw err1;
           connection.release();
 
-          console.log("Transaccion finalizada");
-          console.log(data);
+          console.log("Transaccion con ID: "+ data.id+ " finalizada correctamente");
         
           io.sockets.emit('finalizartransaccion', data);//Devolvemos la transaccion
         });
