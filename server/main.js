@@ -4,6 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
+var dateFormat = require('dateformat');
 
 app.use(express.static(__dirname + '/../public'));//Aplica como estaticos los archivos de la carpeta publica
                                                   //Pongo los /../ para acceder a la raiz
@@ -229,16 +230,19 @@ socket.on('getcercanos', function(data) {
 socket.on('buscardisponible', function(data) {
     if(data != null)
     {
-      console.log("El cliente " + data.id + " buscando un servicio")
+      socket.join('transaccion-'+ data.id);
+      console.log("El cliente " + data.id + " buscando un servicio");
       socket.broadcast.emit('solicitudcliente',data);
       
     }
  });
 
  //ACEPTAR SOLICITUD BUSQUEDA
+ //EMPLEADO ACEPTA
 socket.on('aceptarsolicitud', function(data) {
-    if(data != null || data.length > 0)//data es un array(trae cliente aceptado/empleado aceptador/Transaccion)
+    if(data != null && data.length > 0)//data es un array(trae cliente aceptado/empleado aceptador/Transaccion)
     {
+      var room = "";
 
       for (var i=0;i< data.length;i++) 
       {
@@ -260,32 +264,40 @@ socket.on('aceptarsolicitud', function(data) {
 
           if(data[i].tipo == "Cliente")
           {
+            room = 'transaccion-'+ data[i].id;
+            socket.join('transaccion-'+ data[i].id);
             console.log("Solicitud aceptada para el Cliente " + data[i].usuario);
           }
 
           if(data[i].tipo == "Transaccion")
           {
             //LE SACAMOS EL ID
-            data[i].id = null;
-            var empleadoTr = data[i].empleadoTransaccion;
-            var clienteTr = data[i].clienteTransaccion;
+            var transaccionActual = data[i];
+            transaccionActual.id = null;
+            var empleadoTr = data[i].empleadoTransaccion.id;
+            var clienteTr = data[i].clienteTransaccion.id;
             var activoTr = data[i].isActiva;
             var totalTr = data[i].totalTransaccion;
-            var idTr = data[i].id;
+            var fechaIniTr = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+            var idTr = transaccionActual.id;
             
             console.log("Creando transaccion");
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
-                connection.query('INSERT INTO transaccion SET empleadoTransaccion = ?,clienteTransaccion = ?,fechaInicioTransaccion = now(),isActiva = ?,totalTransaccion = ?', [empleadoTr,clienteTr,activoTr,totalTr], function(err1, result) {
+                connection.query('INSERT INTO transaccion SET empleadoTransaccion = ?,clienteTransaccion = ?,fechaInicioTransaccion = ?,isActiva = ?,totalTransaccion = ?', [empleadoTr,clienteTr,fechaIniTr,activoTr,totalTr], function(err1, result) {
                   if (err1) throw err1;
                   connection.release();
                   idTr = result.insertId;//Le ponemos el ID
                   console.log("Transaccion creada con ID: " + idTr);  
+
+                  transaccionActual.id = idTr;
+                  transaccionActual.fechaInicioTransaccion = fechaIniTr;
+                  io.to(room).emit('transaccioniniciada',transaccionActual);//Solo a los participantes del room(Cliente y Empleado)
+                  io.sockets.emit('transaccioniniciada', transaccionActual);//Devolvemos la transaccion
                 });
             });
 
-            data[i].id = idTr;
-            io.sockets.emit('iniciartransaccion', data[i]);//Devolvemos la transaccion
+            
 
           }
       }
@@ -316,13 +328,16 @@ socket.on('iniciartransaccion', function(data) {
 //FINALIZAR TRANSACCION
 socket.on('finalizartransaccion', function(data) {
 
+    var fechaFin = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+
     pool.getConnection(function(err, connection) {
         if (err) throw err;
-        connection.query('UPDATE transaccion SET fechaFinTransaccion = now(), isActiva = ? where id = ?', [data.isActiva,data.id], function(err1, result) {
+        connection.query('UPDATE transaccion SET fechaFinTransaccion = ?, isActiva = ? where id = ?', [data.fechaFinTransaccion,data.isActiva,data.id], function(err1, result) {
           if (err1) throw err1;
           connection.release();
 
           console.log("Transaccion con ID: "+ data.id+ " finalizada correctamente");
+          data.fechaFinTransaccion = fechaFin;
         
           io.sockets.emit('finalizartransaccion', data);//Devolvemos la transaccion
         });
@@ -372,3 +387,19 @@ function GetCercanos(latitude, longitude, limite) {
   console.log("Usuarios Cercanos: " + empleadosCercanos.length);
 }
 //------------------------------ CALCULO DE CERCANOS -----------------
+/*
+socket.emit('message', "this is a test"); //sending to sender-client only
+socket.broadcast.emit('message', "this is a test"); //sending to all clients except sender
+socket.broadcast.to('game').emit('message', 'nice game'); //sending to all clients in 'game' room(channel) except sender
+socket.to('game').emit('message', 'enjoy the game'); //sending to sender client, only if they are in 'game' room(channel)
+socket.broadcast.to(socketid).emit('message', 'for your eyes only'); //sending to individual socketid
+io.emit('message', "this is a test"); //sending to all clients, include sender
+io.in('game').emit('message', 'cool game'); //sending to all clients in 'game' room(channel), include sender
+io.of('myNamespace').emit('message', 'gg'); //sending to all clients in namespace 'myNamespace', include sender
+socket.emit(); //send to all connected clients
+socket.broadcast.emit(); //send to all connected clients except the one that sent the message
+socket.on(); //event listener, can be called on client to execute on server
+io.sockets.socket(); //for emiting to specific clients
+io.sockets.emit(); //send to all connected clients (same as socket.emit)
+io.sockets.on() ; //initial connection from a client.
+*/
