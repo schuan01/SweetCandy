@@ -292,8 +292,8 @@ socket.on('aceptarsolicitud', function(data) {
 
                   transaccionActual.id = idTr;
                   transaccionActual.fechaInicioTransaccion = fechaIniTr;
-                  io.to(room).emit('transaccioniniciada',transaccionActual);//Solo a los participantes del room(Cliente y Empleado)
-                  io.sockets.emit('transaccioniniciada', transaccionActual);//Devolvemos la transaccion
+                  io.to(room).emit('transaccioniniciada',transaccionActual);//Solo a los participantes del room(Cliente)
+                  //io.sockets.emit('transaccioniniciada', transaccionActual);//Devolvemos la transaccion
                 });
             });
 
