@@ -50,6 +50,8 @@ else
 
 var empleadosCercanos = [];
 var empleadosConectados = [];
+var clientesConectados = [];
+var idClienteDisponible = 0;
 
 app.get('/test', function(req, res) {  
   res.status(200).send("Server Online");
@@ -145,17 +147,36 @@ socket.on('cambiarestado', function(data) {
 });
 
 //CONECTAMOS AL USUARIO DEL SERVIDOR
+socket.on('conectarclienteanonimo', function(data) {
+
+  if(data != null)
+  {
+    idClienteDisponible++;//Le agrego un nuevo valor al cliente conectado
+    data.id = idClienteDisponible; 
+    clientesConectados.push(data);
+
+    //Mandamos los usuarios que quedan
+    console.log("Cliente conectado con ID " + data.id);
+    console.log("Clientes conectados ahora: " + clientesConectados.length);
+    socket.emit("clienteanonimoconectado",data);//Devolvemos el cliente conectado con un ID
+  }
+
+  
+    
+});
+
+//CONECTAMOS AL USUARIO DEL SERVIDOR
 socket.on('conectarusuario', function(data) {
 
   if(data != null)
   {
     empleadosConectados.push(data);
+
+    //Mandamos los usuarios que quedan
+    console.log("Empleado conectado");
+    console.log("Empleados conectados ahora: " + empleadosConectados.length);
   }
 
-  //Mandamos los usuarios que quedan
-  console.log("Usuario conectado");
-  console.log("Usuarios conectados ahora: " + empleadosConectados.length);
-    
 });
 
 //DESCONECTAMOS AL USUARIO DEL SERVIDOR
@@ -166,15 +187,32 @@ socket.on('desconectarusuario', function(data) {
           if(empleadosConectados[i].id == data.id)
           {
             empleadosConectados.splice(i, 1);//Sacamos el usuario de conectados
+            //Mandamos los usuarios que quedan
+            console.log("Empleado desconectado");
+            console.log("Empleado conectados ahora: " + clientesConectados.length);
             break;
           }
 
   }
 
-  //Mandamos los usuarios que quedan
-   console.log("Usuario desconectado");
-  console.log("Usuarios conectados ahora: " + empleadosConectados.length);
-    
+  
+});
+
+//DESCONECTAMOS AL CLIENTE DEL SERVIDOR
+socket.on('desconectarclienteanonimo', function(data) {
+
+  for (var i=0;i< clientesConectados.length;i++) 
+  {
+          if(clientesConectados[i].id == data.id)
+          {
+            clientesConectados.splice(i, 1);//Sacamos el cliente de conectados
+            //Mandamos los usuarios que quedan
+            console.log("Cliente desconectado");
+            console.log("Clientes conectados ahora: " + clientesConectados.length);
+            break;
+          }
+
+  }
 });
 
 
@@ -198,8 +236,8 @@ socket.on('loginempleado', function(data) {
             {
           
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
-              console.log("Nuevo usuario logeado");
-              console.log("Usuarios conectados ahora: " + empleadosConectados.length);
+              console.log("Nuevo Empleado logeado");
+              console.log("Empleados conectados ahora: " + empleadosConectados.length);
               io.sockets.emit('usuariologeado', results[i]);
               
             }     
@@ -233,6 +271,17 @@ socket.on('buscardisponible', function(data) {
       socket.join('transaccion-'+ data.id);
       console.log("El cliente " + data.id + " buscando un servicio");
       socket.broadcast.emit('solicitudcliente',data);
+      
+    }
+ });
+
+//CANCELAR SOLICITUD BUSQUEDA
+socket.on('cancelarsolicitud', function(data) {
+    if(data != null)
+    {
+      socket.leave('transaccion-'+ data.id);
+      console.log("El cliente " + data.id + " ha cancelado la solicitud");
+      socket.broadcast.emit('solicitudcancelada',data);
       
     }
  });
@@ -332,14 +381,14 @@ socket.on('finalizartransaccion', function(data) {
 
     pool.getConnection(function(err, connection) {
         if (err) throw err;
-        connection.query('UPDATE transaccion SET fechaFinTransaccion = ?, isActiva = ? where id = ?', [data.fechaFinTransaccion,data.isActiva,data.id], function(err1, result) {
+        connection.query('UPDATE transaccion SET fechaFinTransaccion = ?, isActiva = ? where id = ?', [fechaFin,data.isActiva,data.id], function(err1, result) {
           if (err1) throw err1;
           connection.release();
 
           console.log("Transaccion con ID: "+ data.id+ " finalizada correctamente");
           data.fechaFinTransaccion = fechaFin;
         
-          io.sockets.emit('finalizartransaccion', data);//Devolvemos la transaccion
+          io.sockets.emit('transaccionfinalizada', data);//Devolvemos la transaccion
         });
     });
     
