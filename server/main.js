@@ -189,7 +189,7 @@ socket.on('desconectarusuario', function(data) {
             empleadosConectados.splice(i, 1);//Sacamos el usuario de conectados
             //Mandamos los usuarios que quedan
             console.log("Empleado desconectado");
-            console.log("Empleado conectados ahora: " + clientesConectados.length);
+            console.log("Empleado conectados ahora: " + empleadosConectados.length);
             break;
           }
 
@@ -234,7 +234,8 @@ socket.on('loginempleado', function(data) {
           {
             for (var i in results) 
             {
-          
+
+              results[i].isOnline = true;//No viene de la BD por eso lo agregamos
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
               console.log("Nuevo Empleado logeado");
               console.log("Empleados conectados ahora: " + empleadosConectados.length);
@@ -257,11 +258,14 @@ socket.on('conectados', function(data) {
 
 //OBTIENE LOS EMPLEADOS CERCANOS
 socket.on('getcercanos', function(data) {
+    empleadosCercanos = [];
     if(empleadosConectados.length > 0)
     {
       GetCercanos(data.latitud,data.longitud,data.limite);
+      socket.emit('empleadoscercanos', empleadosCercanos);
     }
-    socket.emit('empleadoscercanos', empleadosCercanos);
+    
+    
   });
 
   //ENVIAR SOLICITUD BUSQUEDA
@@ -378,6 +382,7 @@ socket.on('iniciartransaccion', function(data) {
 socket.on('finalizartransaccion', function(data) {
 
     var fechaFin = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    data.isActiva = false;//Siempre es false
 
     pool.getConnection(function(err, connection) {
         if (err) throw err;
