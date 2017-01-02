@@ -381,7 +381,7 @@ socket.on('iniciartransaccion', function(data) {
 //FINALIZAR TRANSACCION
 socket.on('finalizartransaccion', function(data) {
 
-    var room = 'transaccion-'+ data[i].clienteTransaccion.id;
+    var room = 'transaccion-'+ data.clienteTransaccion.id;
 
     var fechaFin = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     data.isActiva = false;//Siempre es false
@@ -396,7 +396,7 @@ socket.on('finalizartransaccion', function(data) {
           data.fechaFinTransaccion = fechaFin;
         
           io.to(room).emit('transaccionfinalizada', data);//Devolvemos la transaccion
-          socket.leave('transaccion-'+ data[i].clienteTransaccion.id);
+          socket.leave('transaccion-'+ data.clienteTransaccion.id);
         });
     });
     
