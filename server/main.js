@@ -99,7 +99,7 @@ socket.on('nuevoempleado', function(data) {
           empleadosConectados.push(data);//Lo agregamos a la lista de conectados POR AHORA
           console.log(data);
         
-          io.sockets.emit('empleadocreado', data);
+          socket.emit('empleadocreado', data);
         });
     });
 	
@@ -239,7 +239,7 @@ socket.on('loginempleado', function(data) {
               empleadosConectados.push(results[i]);//Lo agregamos a la lista
               console.log("Nuevo Empleado logeado");
               console.log("Empleados conectados ahora: " + empleadosConectados.length);
-              io.sockets.emit('usuariologeado', results[i]);
+              socket.emit('usuariologeado', results[i]);
               
             }     
           }
@@ -373,13 +373,15 @@ socket.on('iniciartransaccion', function(data) {
           data.id = result.insertId;//Le ponemos el ID
           console.log(data);
         
-          io.sockets.emit('iniciartransaccion', data);//Devolvemos la transaccion
+          socket.emit('iniciartransaccion', data);//Devolvemos la transaccion
         });
     });
     
   });
 //FINALIZAR TRANSACCION
 socket.on('finalizartransaccion', function(data) {
+
+    var room = 'transaccion-'+ data[i].clienteTransaccion.id;
 
     var fechaFin = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     data.isActiva = false;//Siempre es false
@@ -393,7 +395,8 @@ socket.on('finalizartransaccion', function(data) {
           console.log("Transaccion con ID: "+ data.id+ " finalizada correctamente");
           data.fechaFinTransaccion = fechaFin;
         
-          io.sockets.emit('transaccionfinalizada', data);//Devolvemos la transaccion
+          io.to(room).emit('transaccionfinalizada', data);//Devolvemos la transaccion
+          socket.leave('transaccion-'+ data[i].clienteTransaccion.id);
         });
     });
     
