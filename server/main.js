@@ -52,6 +52,7 @@ var empleadosCercanos = [];
 var empleadosConectados = [];
 var clientesConectados = [];
 var idClienteDisponible = 0;
+var idBusquedaCliente = 0;
 
 app.get('/test', function(req, res) {  
   res.status(200).send("Server Online");
@@ -250,6 +251,25 @@ socket.on('loginempleado', function(data) {
 	
 });
 
+//EDITAR USUARIO
+socket.on('editarusuario', function(data) {
+
+  var modificado = false;
+
+  pool.getConnection(function(err, connection) {
+           if (err) throw err;
+           connection.query('UPDATE empleado SET edad = ? where id = ?', [data.edad,data.id], function(err1, result) {
+             if (err1) throw err1;
+               connection.release();
+               console.log("Usuario: " + data.id + " modificado correctamente");
+               modificado = true;  
+
+            });
+      });
+
+  socket.emit('usuarioeditado', modificado);//Devolvemos el resultado   
+});
+
 //OBTIENE LOS EMPLEADOS CONECTADOS
 socket.on('conectados', function(data) {   
     //Emitimos el array para que todos los clientes lo reciban
@@ -272,8 +292,10 @@ socket.on('getcercanos', function(data) {
 socket.on('buscardisponible', function(data) {
     if(data != null)
     {
-      socket.join('transaccion-'+ data.id);
-      console.log("El cliente " + data.id + " buscando un servicio");
+      idBusquedaCliente++;
+      data.idBusquedaTransaccion = idBusquedaCliente;
+      socket.join('transaccion-'+ data.idBusquedaTransaccion);//Unimos al room
+      console.log("El cliente " + data.clienteTransaccion.id + " buscando un servicio");
       socket.broadcast.emit('solicitudcliente',data);
       
     }
@@ -283,7 +305,7 @@ socket.on('buscardisponible', function(data) {
 socket.on('cancelarsolicitud', function(data) {
     if(data != null)
     {
-      socket.leave('transaccion-'+ data.id);
+      socket.leave('transaccion-'+ data.idBusquedaTransaccion);//Nos vamos del room
       console.log("El cliente " + data.id + " ha cancelado la solicitud");
       socket.broadcast.emit('solicitudcancelada',data);
       
@@ -317,13 +339,15 @@ socket.on('aceptarsolicitud', function(data) {
 
           if(data[i].tipo == "Cliente")
           {
-            room = 'transaccion-'+ data[i].id;
-            socket.join('transaccion-'+ data[i].id);
             console.log("Solicitud aceptada para el Cliente " + data[i].usuario);
           }
 
           if(data[i].tipo == "Transaccion")
           {
+            var idTemporalRoom = data[i].idBusquedaTransaccion;//ID TRANSACCION TEMPORAL
+            room = 'transaccion-'+ idTemporalRoom;
+            socket.join('transaccion-'+ idTemporalRoom);
+
             //LE SACAMOS EL ID
             var transaccionActual = data[i];
             transaccionActual.id = null;
@@ -346,7 +370,6 @@ socket.on('aceptarsolicitud', function(data) {
                   transaccionActual.id = idTr;
                   transaccionActual.fechaInicioTransaccion = fechaIniTr;
                   io.to(room).emit('transaccioniniciada',transaccionActual);//Solo a los participantes del room(Cliente)
-                  //io.sockets.emit('transaccioniniciada', transaccionActual);//Devolvemos la transaccion
                 });
             });
 
@@ -357,31 +380,10 @@ socket.on('aceptarsolicitud', function(data) {
     }
  });
 //------------ TRANSACCIONES --------------------
-//INICIAR TRANSACCION
-socket.on('iniciartransaccion', function(data) {
-
-   //LE SACAMOS EL ID
-    data.id = null;
-
-    pool.getConnection(function(err, connection) {
-        if (err) throw err;
-        connection.query('INSERT INTO transaccion SET ?', data, function(err1, result) {
-          if (err1) throw err1;
-          connection.release();
-
-          console.log("Transaccion creada");
-          data.id = result.insertId;//Le ponemos el ID
-          console.log(data);
-        
-          socket.emit('iniciartransaccion', data);//Devolvemos la transaccion
-        });
-    });
-    
-  });
 //FINALIZAR TRANSACCION
 socket.on('finalizartransaccion', function(data) {
 
-    var room = 'transaccion-'+ data.clienteTransaccion.id;
+    var room = 'transaccion-'+ data.idBusquedaTransaccion;
 
     var fechaFin = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     data.isActiva = false;//Siempre es false
