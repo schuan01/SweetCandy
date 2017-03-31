@@ -10,7 +10,7 @@ exports = module.exports = function (io,idBusquedaCliente,empleadosConectados) {
                 data.idBusquedaTransaccion = idBusquedaCliente;
                 socket.join('transaccion-' + data.idBusquedaTransaccion);//Unimos al room
                 console.log("El cliente " + data.clienteTransaccion.id + " buscando un servicio con ID transaccion: " + data.idBusquedaTransaccion);
-                io.sockets.emit('solicitudcliente', data);
+                io.sockets.emit('solicitudcliente', data);//TODO CAMBIAR PARA QUE EL SENDER NO RECIBA LA NOTIFICACION
 
             }
         });

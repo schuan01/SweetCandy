@@ -29,73 +29,70 @@ exports = module.exports = function (io, idClienteDisponible, empleadosConectado
 
                 });
             });
+        });
 
 
-            //CONECTAMOS AL USUARIO DEL SERVIDOR
-            socket.on('conectarclienteanonimo', function (data) {
+        //CONECTAMOS AL USUARIO DEL SERVIDOR
+        socket.on('conectarclienteanonimo', function (data) {
 
-                if (data != null) {
-                    idClienteDisponible++;//Le agrego un nuevo valor al cliente conectado
-                    data.id = idClienteDisponible;
-                    clientesConectados.push(data);
+            if (data != null) {
+                idClienteDisponible++;//Le agrego un nuevo valor al cliente conectado
+                data.id = idClienteDisponible;
+                clientesConectados.push(data);
 
+                //Mandamos los usuarios que quedan
+                console.log("Cliente conectado con ID " + data.id);
+                console.log("Clientes conectados ahora: " + clientesConectados.length);
+                socket.emit("clienteanonimoconectado", data);//Devolvemos el cliente conectado con un ID
+            }
+
+
+
+        });
+
+        //CONECTAMOS AL USUARIO DEL SERVIDOR
+        socket.on('conectarusuario', function (data) {
+
+            if (data != null) {
+                empleadosConectados.push(data);
+
+                //Mandamos los usuarios que quedan
+                console.log("Empleado conectado");
+                console.log("Empleados conectados ahora: " + empleadosConectados.length);
+            }
+
+        });
+
+        //DESCONECTAMOS AL USUARIO DEL SERVIDOR
+        socket.on('desconectarusuario', function (data) {
+
+            for (var i = 0; i < empleadosConectados.length; i++) {
+                if (empleadosConectados[i].id == data.id) {
+                    empleadosConectados.splice(i, 1);//Sacamos el usuario de conectados
                     //Mandamos los usuarios que quedan
-                    console.log("Cliente conectado con ID " + data.id);
+                    console.log("Empleado desconectado");
+                    console.log("Empleado conectados ahora: " + empleadosConectados.length);
+                    break;
+                }
+
+            }
+
+
+        });
+
+        //DESCONECTAMOS AL CLIENTE DEL SERVIDOR
+        socket.on('desconectarclienteanonimo', function (data) {
+
+            for (var i = 0; i < clientesConectados.length; i++) {
+                if (clientesConectados[i].id == data.id) {
+                    clientesConectados.splice(i, 1);//Sacamos el cliente de conectados
+                    //Mandamos los usuarios que quedan
+                    console.log("Cliente desconectado");
                     console.log("Clientes conectados ahora: " + clientesConectados.length);
-                    socket.emit("clienteanonimoconectado", data);//Devolvemos el cliente conectado con un ID
+                    break;
                 }
 
-
-
-            });
-
-            //CONECTAMOS AL USUARIO DEL SERVIDOR
-            socket.on('conectarusuario', function (data) {
-
-                if (data != null) {
-                    empleadosConectados.push(data);
-
-                    //Mandamos los usuarios que quedan
-                    console.log("Empleado conectado");
-                    console.log("Empleados conectados ahora: " + empleadosConectados.length);
-                }
-
-            });
-
-            //DESCONECTAMOS AL USUARIO DEL SERVIDOR
-            socket.on('desconectarusuario', function (data) {
-
-                for (var i = 0; i < empleadosConectados.length; i++) {
-                    if (empleadosConectados[i].id == data.id) {
-                        empleadosConectados.splice(i, 1);//Sacamos el usuario de conectados
-                        //Mandamos los usuarios que quedan
-                        console.log("Empleado desconectado");
-                        console.log("Empleado conectados ahora: " + empleadosConectados.length);
-                        break;
-                    }
-
-                }
-
-
-            });
-
-            //DESCONECTAMOS AL CLIENTE DEL SERVIDOR
-            socket.on('desconectarclienteanonimo', function (data) {
-
-                for (var i = 0; i < clientesConectados.length; i++) {
-                    if (clientesConectados[i].id == data.id) {
-                        clientesConectados.splice(i, 1);//Sacamos el cliente de conectados
-                        //Mandamos los usuarios que quedan
-                        console.log("Cliente desconectado");
-                        console.log("Clientes conectados ahora: " + clientesConectados.length);
-                        break;
-                    }
-
-                }
-            });
-
-
-
+            }
         });
     });
 }

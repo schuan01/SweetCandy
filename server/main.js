@@ -51,7 +51,7 @@ io.on('connection', function (socket) {
   console.log('Nueva conexion desde ' + address);
 
 });//---TERMINA CONNECTION ------------
-//------------------------------ CALCULO DE CERCANOS -----------------
+
 /*
 socket.emit('message', "this is a test"); //sending to sender-client only
 socket.broadcast.emit('message', "this is a test"); //sending to all clients except sender

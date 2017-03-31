@@ -1,6 +1,6 @@
 var bd = require('./bd');
 
-exports = module.exports = function (io,empleadosConectados) {
+exports = module.exports = function (io, empleadosConectados) {
     io.sockets.on('connection', function (socket) {
 
         //CREAR UN NUEVO EMPLEADO
@@ -62,6 +62,31 @@ exports = module.exports = function (io,empleadosConectados) {
             }
 
 
+        });
+
+        //DEVUELVE LA INFORMACION DEL USUARIO CON ESE ID
+        socket.on('obtenerusuario', function (data) {
+            bd.getConnection(function (err, connection) {
+                if (err) throw err;
+                connection.query('SELECT * FROM empleado WHERE id = ?', [data.id], function (error, results, fields) {
+                    if (error) throw error;
+                    connection.release();
+
+                    if (results.length == 0) {
+
+                        socket.emit('usuarioencontrado', null);
+                    }
+                    else {
+                        for (var i in results) {
+
+                            console.log("Usuario encontrado con ID: " + results[i].id);
+                            socket.emit('usuarioencontrado', results[i]);
+
+                        }
+                    }
+
+                });
+            });
         });
 
 
