@@ -11,12 +11,14 @@ var idClienteDisponible = 0;
 var idBusquedaCliente = 0;
 
 
+
 //-----MIS MODULOS-----
 var transaccionesJS = require('./transacciones')(io,idBusquedaCliente,empleadosConectados);
 var conectarJS = require('./conectar')(io,idClienteDisponible,empleadosConectados,clientesConectados);
 var ubicacionesJS = require('./ubicaciones')(io,empleadosConectados,empleadosCercanos);
 var usuariosJS = require('./usuarios')(io,empleadosConectados);
 var fotosJS = require('./fotos')(io);
+var listadosJS = require('./listados')(io,empleadosConectados,clientesConectados,idClienteDisponible,idBusquedaCliente);
 
 //---------------------
 var fs = require('fs');
@@ -33,6 +35,20 @@ app.get('/test', function (req, res) {
 
 app.get('/getLoc', function (req, res) {
   fs.readFile('./public/get_loc.html', function (err, html) {
+    if (err) {
+      res.status(200).send(err);
+    }
+    else {
+
+      res.writeHeader(200, { "Content-Type": "text/html" });
+      res.write(html);
+      res.end();
+    }
+  });
+});
+
+app.get('/admin', function (req, res) {
+  fs.readFile('./public/admin.html', function (err, html) {
     if (err) {
       res.status(200).send(err);
     }
