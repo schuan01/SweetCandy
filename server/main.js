@@ -65,6 +65,7 @@ app.get('/admin', function (req, res) {
 io.on('connection', function (socket) {
   var address = socket.request.connection.remoteAddress;
   console.log('Nueva conexion desde ' + address);
+  console.log("Id del Socket : "+socket.id); 
 
 });//---TERMINA CONNECTION ------------
 
