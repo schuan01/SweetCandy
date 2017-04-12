@@ -27,7 +27,6 @@ exports = module.exports = function (io,empleadosConectados,empleadosCercanos) {
         });
 
     });
-}
 
 //------------------------------ CALCULO DE CERCANOS -----------------
 // Convert Degress to Radians
@@ -61,5 +60,6 @@ function GetCercanos(latitude, longitude, limite) {
     }
 
     console.log("Usuarios Cercanos: " + empleadosCercanos.length);
+}
 }
 //------------------------------ CALCULO DE CERCANOS -----------------
