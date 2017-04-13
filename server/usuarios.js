@@ -65,10 +65,10 @@ exports = module.exports = function (io, empleadosConectados) {
         });
 
         //DEVUELVE LA INFORMACION DEL USUARIO CON ESE ID
-        socket.on('obtenerusuario', function (data) {
+        socket.on('obtenerempleado', function (data) {
             bd.getConnection(function (err, connection) {
                 if (err) throw err;
-                connection.query('SELECT * FROM empleado WHERE id = ?', [data.id], function (error, results, fields) {
+                connection.query('SELECT * FROM empleado e LEFT JOIN FotosUsuario f on f.empleadoFoto = e.id WHERE e.id = ?', [data.id], function (error, results, fields) {
                     if (error) throw error;
                     connection.release();
 
@@ -77,12 +77,35 @@ exports = module.exports = function (io, empleadosConectados) {
                         socket.emit('usuarioencontrado', null);
                     }
                     else {
+                        var fotos = [];
+                        var info = {};
                         for (var i in results) {
-
-                            console.log("Usuario encontrado con ID: " + results[i].id);
-                            socket.emit('usuarioencontrado', results[i]);
+                            if(i == 0)
+                            {
+                                info = {
+                                    "id" : results[i].id,
+                                    "usuario" : results[i].usuario,
+                                    "descripcion" : results[i].descripcion,
+                                    "rating" : results[i].rating,
+                                    "edad" : results[i].edad,
+                                    "latitud" : results[i].latitud,
+                                    "longitud" : results[i].longitud, 
+                                    "costo" : results[i].costo,
+                                    "email" : results[i].email,
+                                    "usuario" : results[i].usuario,
+                                    "fotos" :[{"urlFoto":results[i].urlFoto }]
+                                }
+                            }
+                            else
+                            {
+                                info.fotos.push(results[i].urlFoto)
+                            }
 
                         }
+
+                        console.log("Usuario encontrado con ID: " + info.id);
+                        console.log("Cantidad de Fotos encontradas: " + info.fotos.length);
+                        socket.emit('usuarioencontrado', info);
                     }
 
                 });
