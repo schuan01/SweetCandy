@@ -98,7 +98,7 @@ exports = module.exports = function (io, empleadosConectados) {
                             }
                             else
                             {
-                                info.fotos.push(results[i].urlFoto)
+                                info.fotos.push({"urlFoto":results[i].urlFoto})
                             }
 
                         }
