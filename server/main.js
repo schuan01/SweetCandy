@@ -9,16 +9,17 @@ var empleadosConectados = [];
 var clientesConectados = [];
 var idClienteDisponible = 0;
 var idBusquedaCliente = 0;
+var hashSocketEmpleados = [];
 
 
 
 //-----MIS MODULOS-----
-var transaccionesJS = require('./transacciones')(io,idBusquedaCliente,empleadosConectados);
-var conectarJS = require('./conectar')(io,idClienteDisponible,empleadosConectados,clientesConectados);
-var ubicacionesJS = require('./ubicaciones')(io,empleadosConectados,empleadosCercanos);
-var usuariosJS = require('./usuarios')(io,empleadosConectados);
+var transaccionesJS = require('./transacciones')(io, idBusquedaCliente, empleadosConectados);
+var conectarJS = require('./conectar')(io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados);
+var ubicacionesJS = require('./ubicaciones')(io, empleadosConectados, empleadosCercanos);
+var usuariosJS = require('./usuarios')(io, empleadosConectados);
 var fotosJS = require('./fotos')(io);
-var listadosJS = require('./listados')(io,empleadosConectados,clientesConectados,idClienteDisponible,idBusquedaCliente);
+var listadosJS = require('./listados')(io, empleadosConectados, clientesConectados, idClienteDisponible, idBusquedaCliente);
 
 //---------------------
 var fs = require('fs');
@@ -65,7 +66,7 @@ app.get('/admin', function (req, res) {
 io.on('connection', function (socket) {
   var address = socket.request.connection.remoteAddress;
   console.log('Nueva conexion desde ' + address);
-  console.log("Id del Socket : "+socket.id); 
+  console.log("Id del Socket : " + socket.id);
 
 });//---TERMINA CONNECTION ------------
 

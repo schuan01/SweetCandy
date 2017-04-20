@@ -80,25 +80,23 @@ exports = module.exports = function (io, empleadosConectados) {
                         var fotos = [];
                         var info = {};
                         for (var i in results) {
-                            if(i == 0)
-                            {
+                            if (i == 0) {
                                 info = {
-                                    "id" : results[i].id,
-                                    "usuario" : results[i].usuario,
-                                    "descripcion" : results[i].descripcion,
-                                    "rating" : results[i].rating,
-                                    "edad" : results[i].edad,
-                                    "latitud" : results[i].latitud,
-                                    "longitud" : results[i].longitud, 
-                                    "costo" : results[i].costo,
-                                    "email" : results[i].email,
-                                    "usuario" : results[i].usuario,
-                                    "fotos" :[{"urlFoto":results[i].urlFoto }]
+                                    "id": results[i].id,
+                                    "usuario": results[i].usuario,
+                                    "descripcion": results[i].descripcion,
+                                    "rating": results[i].rating,
+                                    "edad": results[i].edad,
+                                    "latitud": results[i].latitud,
+                                    "longitud": results[i].longitud,
+                                    "costo": results[i].costo,
+                                    "email": results[i].email,
+                                    "usuario": results[i].usuario,
+                                    "fotos": [{ "urlFoto": results[i].urlFoto }]
                                 }
                             }
-                            else
-                            {
-                                info.fotos.push({"urlFoto":results[i].urlFoto})
+                            else {
+                                info.fotos.push({ "urlFoto": results[i].urlFoto })
                             }
 
                         }

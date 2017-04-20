@@ -1,6 +1,6 @@
 var bd = require('./bd');
 
-exports = module.exports = function (io, idClienteDisponible, empleadosConectados, clientesConectados) {
+exports = module.exports = function (io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados) {
     io.sockets.on('connection', function (socket) {
 
         //LOGIN EMPLEADO
@@ -18,10 +18,26 @@ exports = module.exports = function (io, idClienteDisponible, empleadosConectado
                     else {
                         for (var i in results) {
 
+                            var hayRenovacion = false;
+
+                            for (var i = 0; i < hashSocketEmpleados.length; i++) {//Recorremos todo los hashes
+                                if (results[i].id == hashSocketEmpleados[i].idEmpleado)//Si esta
+                                {
+                                    hashSocketEmpleados[i].socketId = socket.id;//Renuevo el Socket
+                                    hayRenovacion = true;
+                                    break;
+                                }
+
+                            }
+
                             results[i].isOnline = true;//No viene de la BD por eso lo agregamos
                             empleadosConectados.push(results[i]);//Lo agregamos a la lista
                             console.log("Nuevo Empleado logeado");
                             console.log("Empleados conectados ahora: " + empleadosConectados.length);
+                            if (!hayRenovacion) {
+                                hashSocketEmpleados.push({ "idEmpleado": results[i].id, "socketId": socket.id });
+                            }
+                            console.log("Empleado con ID:" + results[i].id + " agregado con Socket:" + socket.id);
                             socket.emit('usuariologeado', results[i]);
 
                         }

@@ -1,7 +1,7 @@
 var dateFormat = require('dateformat');
 var bd = require('./bd');
 
-exports = module.exports = function (io,idBusquedaCliente,empleadosConectados) {
+exports = module.exports = function (io, idBusquedaCliente, empleadosConectados, hashSocketEmpleados) {
     io.sockets.on('connection', function (socket) {
         //ENVIAR SOLICITUD BUSQUEDA
         socket.on('buscardisponible', function (data) {
@@ -17,20 +17,29 @@ exports = module.exports = function (io,idBusquedaCliente,empleadosConectados) {
 
         //ENVIAR SOLICITUD AL ID DE SOCKET
         socket.on('enviarsolicitudausuario', function (data) {
-            console.log("Solicitud de : "+socket.id);
-            if (data != null) 
-            {
-                idBusquedaCliente++;
-                data.idBusquedaTransaccion = idBusquedaCliente;
-                socket.join('transaccion-' + data.idBusquedaTransaccion);//Unimos al room
-                console.log("El cliente " + data.clienteTransaccion.id + " solicitando un servicio con ID transaccion: " + data.idBusquedaTransaccion);
-                io.to("pepe").emit('solicitudrecibida', "");
+            if (data != null) {
+                var socketEmpleado = "";
+                for (var i = 0; i < hashSocketEmpleados.length; i++) {//Recorremos todo los hashes
+                    if (data.empleadoTransaccion.id == hashSocketEmpleados[i].idEmpleado)//Si esta
+                    {
+                        socketEmpleado = hashSocketEmpleados[i].socketId;//Paso el socket para poder emitir el evento
+                        break;
+                    }
 
-               
+                }
+                if (socketEmpleado != "") {
+                    idBusquedaCliente++;
+                    data.idBusquedaTransaccion = idBusquedaCliente;
+                    socket.join('transaccion-' + data.idBusquedaTransaccion);//Unimos al room
+                    console.log("El cliente " + data.clienteTransaccion.id + " solicitando un servicio al Socket "+ socketEmpleado +" con ID transaccion: " + data.idBusquedaTransaccion);
+                    io.to(socketEmpleado).emit('solicitudrecibida', "");
+                }
+
+
                 //io.sockets.emit('solicitudcliente', data);//TODO CAMBIAR PARA QUE EL SENDER NO RECIBA LA NOTIFICACION
 
             }
-        }); 
+        });
 
         //CANCELAR SOLICITUD BUSQUEDA
         socket.on('cancelarsolicitud', function (data) {
