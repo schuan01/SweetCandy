@@ -32,7 +32,7 @@ exports = module.exports = function (io, idBusquedaCliente, empleadosConectados,
                     data.idBusquedaTransaccion = idBusquedaCliente;
                     socket.join('transaccion-' + data.idBusquedaTransaccion);//Unimos al room
                     console.log("El cliente " + data.clienteTransaccion.id + " solicitando un servicio al Socket "+ socketEmpleado +" con ID transaccion: " + data.idBusquedaTransaccion);
-                    io.to(socketEmpleado).emit('solicitudrecibida', "");
+                    io.to(socketEmpleado).emit('solicitudrecibida', data);
                 }
 
 
