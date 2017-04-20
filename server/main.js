@@ -14,7 +14,7 @@ var hashSocketEmpleados = [];
 
 
 //-----MIS MODULOS-----
-var transaccionesJS = require('./transacciones')(io, idBusquedaCliente, empleadosConectados);
+var transaccionesJS = require('./transacciones')(io, idBusquedaCliente, empleadosConectados,hashSocketEmpleados);
 var conectarJS = require('./conectar')(io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados);
 var ubicacionesJS = require('./ubicaciones')(io, empleadosConectados, empleadosCercanos);
 var usuariosJS = require('./usuarios')(io, empleadosConectados);
