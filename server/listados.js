@@ -12,10 +12,12 @@ exports = module.exports = function (io, empleadosConectados,clientesConectados,
         });
 
         socket.on('getidClienteDisponible', function (data) {
+            console.log("Se envio getidClienteDisponible: " + idClienteDisponible )
             socket.emit('getidClienteDisponible', idClienteDisponible);
         });
 
         socket.on('getidBusquedaCliente', function (data) {
+            console.log("Se envio getidBusquedaCliente: " + idBusquedaCliente )
             socket.emit('getidBusquedaCliente', idBusquedaCliente);
         });
 
