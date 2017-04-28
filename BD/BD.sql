@@ -1,34 +1,44 @@
 use TestNode;
 
-CREATE TABLE Empleado (
+CREATE TABLE Usuario(
 id INT AUTO_INCREMENT PRIMARY KEY,
 usuario VARCHAR(30) NOT NULL,
 descripcion VARCHAR(30),
-rating FLOAT,
 edad INT,
-costo FLOAT,
-latitud DOUBLE,
-longitud DOUBLE,
 urlFoto VARCHAR(200),
-email VARCHAR(50) NOT NULL, /*HAY QUE HACERLO UNIQUE*/
+email VARCHAR(50) NOT NULL UNIQUE, 
 password VARCHAR(200) NOT NULL
 );
+
+CREATE TABLE Empleado (
+idEmpleado INT AUTO_INCREMENT PRIMARY KEY,
+rating FLOAT,
+costo FLOAT,
+FOREIGN KEY (idEmpleado) REFERENCES Usuario(id)
+);
+
+CREATE TABLE Cliente (
+idCliente INT AUTO_INCREMENT PRIMARY KEY,
+rating FLOAT,
+FOREIGN KEY (idCliente) REFERENCES Usuario(id)
+);
+
 
 CREATE TABLE Transaccion (
 id INT AUTO_INCREMENT PRIMARY KEY,
 empleadoTransaccion INT NOT NULL,
-clienteTransaccion INT NOT NULL,
+clienteTransaccion INT NOT NULL,--POR AHORA NO HACEMOS REFERENCIA YA QUE PUEDE SER ANONIMO(ID 0)
 fechaInicioTransaccion DATETIME NOT NULL,
 fechaFinTransaccion DATETIME,
 isActiva BIT,
 totalTransaccion DOUBLE,
-FOREIGN KEY (empleadoTransaccion) REFERENCES Empleado(id)
+FOREIGN KEY (empleadoTransaccion) REFERENCES Empleado(idEmpleado)
 );
 
 CREATE TABLE FotosUsuario(
 id INT AUTO_INCREMENT PRIMARY KEY,
-empleadoFoto INT NOT NULL,
+usuarioFoto INT NOT NULL,
 urlFoto VARCHAR(200) NOT NULL,
-FOREIGN KEY (empleadoFoto) REFERENCES Empleado(id));
+FOREIGN KEY (usuarioFoto) REFERENCES Usuario(id));
 
 select * from empleado

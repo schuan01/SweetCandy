@@ -7,6 +7,7 @@ var io = require('socket.io')(http);
 var empleadosCercanos = [];
 var empleadosConectados = [];
 var clientesConectados = [];
+var clientesAnonimosConectados = [];
 var idClienteDisponible = 0;
 var idBusquedaCliente = 0;
 var hashSocketEmpleados = [];
@@ -15,11 +16,11 @@ var hashSocketEmpleados = [];
 
 //-----MIS MODULOS-----
 var transaccionesJS = require('./transacciones')(io, idBusquedaCliente, empleadosConectados,hashSocketEmpleados);
-var conectarJS = require('./conectar')(io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados);
+var conectarJS = require('./conectar')(io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados,clientesAnonimosConectados);
 var ubicacionesJS = require('./ubicaciones')(io, empleadosConectados, empleadosCercanos);
 var usuariosJS = require('./usuarios')(io, empleadosConectados);
 var fotosJS = require('./fotos')(io);
-var listadosJS = require('./listados')(io, empleadosConectados, clientesConectados, idClienteDisponible, idBusquedaCliente);
+var listadosJS = require('./listados')(io, empleadosConectados, clientesConectados, idClienteDisponible, idBusquedaCliente,clientesAnonimosConectados);
 
 //---------------------
 var fs = require('fs');

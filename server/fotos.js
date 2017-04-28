@@ -10,7 +10,7 @@ exports = module.exports = function (io) {
             var usu = data.id;
             bd.getConnection(function (err, connection) {
                 if (err) throw err;
-                connection.query('INSERT INTO FotosUsuario SET empleadoFoto = ?,urlFoto = ?', [usu, urlFoto], function (err1, result) {
+                connection.query('INSERT INTO FotosUsuario SET usuarioFoto = ?,urlFoto = ?', [usu, urlFoto], function (err1, result) {
                     if (err1) throw err1;
                     connection.release();
                     idTr = result.insertId;//Le ponemos el ID

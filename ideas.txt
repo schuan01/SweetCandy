@@ -1,0 +1,35 @@
+Tipos de Usuario:
+    - Empleado
+    - Cliente
+    - Anonimo
+
+Empleado:
+    Tiene que tener una cuenta(login) en el sistema, ingresando los datos del usuario, password, mail, edad, tarifa y foto de perfil.
+    La foto de perfil es obligatoria para utilizar el servicio pero no para crear la cuenta. El usuario,password y mail obligatorios tambien(se enviara mail de confirmación con codigo que debe ingresar).
+    En sus opciones podra agregar mas fotos publicas para los clientes.
+    Ademas podra optar por evitar los clientes anonimos.
+    Tambien podra ocultar su ubicacion y solo sera visible cuando el empleado acepta una solicitud del Cliente.
+    Cuando se acepta la solicitud, ambos veran solo su ubicacion y la distancia entre ellos(menor a 2km).
+    Se puede cancelar el cualquier momento el servicio.
+    El empleado es solo invisible a otros empleados, cualquier cliente cerca de 2km podra ver la ubicacion del mismo(mientras este activada)
+
+Cliente:
+    Tiene que tener una cuenta(login) en el sistema, ingresando los datos del usuario, password, mail, edad, foto de perfil.
+    La foto de perfil es obligatoria para utilizar el servicio pero no para crear la cuenta. El usuario,password y mail obligatorios tambien(se enviara mail de confirmación con codigo que debe ingresar).
+    En sus opciones podra agregar mas fotos publicas para los Empleados.
+    Podra ver en el mapa los Empleados con ubicacion activada, seleccionarlos para ver su perfil y optar por solicitarlos o no.
+    Ademas podra buscar sin seleccionar, esto enviara a todos los Empleados conectados(tengan activada la ubicacion o no), esto no lo permite al cliente ver el Empleado antes de aceptarlo.
+    El buscar ya es un "aceptar" cualquier empleado que confirme la solicitud.
+    El cliente es invisible a otros clientes y a los empleados.
+
+Anonimo:
+    Es de tipo cliente pero sin necesidad de registro.
+    Solo puede solicitar un servicio mediante la opcion Buscar(que envia a todos los cercanos).
+    Al Empleado le aparecera que es un Anonimo y no podra ingresar a su perfil. Siempre tiene la opcion de no aceptar sin revelar la ubicacion.
+
+
+Extras:
+
+- El servidor podra enviar notificaciones Push a todos sus usuarios por algun tipo de notificacion.
+- Buscando un servicio desplegara una notificacion de "Buscando..." y se podra salir de la app mientras se corre en segundo plano.
+-

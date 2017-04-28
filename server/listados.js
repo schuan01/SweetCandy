@@ -1,4 +1,4 @@
-exports = module.exports = function (io, empleadosConectados,clientesConectados,idClienteDisponible,idBusquedaCliente) {
+exports = module.exports = function (io, empleadosConectados,clientesConectados,idClienteDisponible,idBusquedaCliente,clientesAnonimosConectados) {
 
     io.sockets.on('connection', function (socket) {
 

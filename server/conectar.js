@@ -1,13 +1,14 @@
 var bd = require('./bd');
 
-exports = module.exports = function (io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados) {
+exports = module.exports = function (io, idClienteDisponible, empleadosConectados, clientesConectados, hashSocketEmpleados,clientesAnonimosConectados) {
     io.sockets.on('connection', function (socket) {
 
         //LOGIN EMPLEADO
-        socket.on('loginempleado', function (data) {
+        socket.on('loginusuario', function (data) {
             bd.getConnection(function (err, connection) {
                 if (err) throw err;
-                connection.query('SELECT * FROM empleado WHERE email = ? and password = ?', [data.email, data.password], function (error, results, fields) {
+                //TODO, CAMBIAR UN POCO ESTO PORQUE EL * TRAE TODA LA INFO.
+                connection.query('SELECT * FROM usuario u LEFT JOIN Empleado e on e.idEmpleado = u.id LEFT JOIN Cliente c on c.idCliente = u.id WHERE u.email = ? and u.password = ?', [data.email, data.password], function (error, results, fields) {
                     if (error) throw error;
                     connection.release();
 
@@ -18,26 +19,52 @@ exports = module.exports = function (io, idClienteDisponible, empleadosConectado
                     else {
                         for (var i in results) {
 
-                            var hayRenovacion = false;
+                            var tipoUsuario = "";
 
-                            for (var i = 0; i < hashSocketEmpleados.length; i++) {//Recorremos todo los hashes
-                                if (results[i].id == hashSocketEmpleados[i].idEmpleado)//Si esta
-                                {
-                                    hashSocketEmpleados[i].socketId = socket.id;//Renuevo el Socket
-                                    hayRenovacion = true;
-                                    break;
+                            if(results[i].idEmpleado != null)
+                            {
+                                results[i].tipoUsuario = "Empleado";
+                            }
+
+                            if(results[i].idCliente != null)
+                            {
+                                results[i].tipoUsuario = "Cliente";
+                            }
+            
+                            if(results[i].tipoUsuario == "Empleado")
+                            {
+                                //Se utiliza el socket id para poder emitirle a un empleado especifico
+
+                                var hayRenovacion = false;
+
+                                for (var i = 0; i < hashSocketEmpleados.length; i++) {//Recorremos todo los hashes
+                                    if (results[i].id == hashSocketEmpleados[i].idEmpleado)//Si esta
+                                    {
+                                        hashSocketEmpleados[i].socketId = socket.id;//Renuevo el Socket
+                                        hayRenovacion = true;
+                                        break;
+                                    }
+
                                 }
+
+                                
+                                empleadosConectados.push(results[i]);//Lo agregamos a la lista
+                                console.log("Nuevo Empleado logeado");
+                                console.log("Empleados conectados ahora: " + empleadosConectados.length);
+                                if (!hayRenovacion) {
+                                    hashSocketEmpleados.push({ "idEmpleado": results[i].id, "socketId": socket.id });
+                                }
+                                console.log("Empleado con ID:" + results[i].id + " agregado con Socket:" + socket.id);
+                            }
+                            else if(results[i].tipoUsuario == "Cliente")
+                            {
+                                clientesConectados.push(results[i]);
+                                console.log("Nuevo Cliente logeado");
+                                console.log("Clientes conectados ahora: " + clientesConectados.length);
 
                             }
 
                             results[i].isOnline = true;//No viene de la BD por eso lo agregamos
-                            empleadosConectados.push(results[i]);//Lo agregamos a la lista
-                            console.log("Nuevo Empleado logeado");
-                            console.log("Empleados conectados ahora: " + empleadosConectados.length);
-                            if (!hayRenovacion) {
-                                hashSocketEmpleados.push({ "idEmpleado": results[i].id, "socketId": socket.id });
-                            }
-                            console.log("Empleado con ID:" + results[i].id + " agregado con Socket:" + socket.id);
                             socket.emit('usuariologeado', results[i]);
 
                         }
@@ -48,17 +75,17 @@ exports = module.exports = function (io, idClienteDisponible, empleadosConectado
         });
 
 
-        //CONECTAMOS AL USUARIO DEL SERVIDOR
+        //CONECTAMOS AL USUARIO ANONIMO DEL SERVIDOR
         socket.on('conectarclienteanonimo', function (data) {
 
             if (data != null) {
                 idClienteDisponible++;//Le agrego un nuevo valor al cliente conectado
                 data.id = idClienteDisponible;
-                clientesConectados.push(data);
+                clientesAnonimosConectados.push(data);
 
                 //Mandamos los usuarios que quedan
-                console.log("Cliente conectado con ID " + data.id);
-                console.log("Clientes conectados ahora: " + clientesConectados.length);
+                console.log("Cliente Anonimo conectado con ID " + data.id);
+                console.log("Clientes Anonimos conectados ahora: " + clientesAnonimosConectados.length);
                 socket.emit("clienteanonimoconectado", data);//Devolvemos el cliente conectado con un ID
             }
 
@@ -66,21 +93,10 @@ exports = module.exports = function (io, idClienteDisponible, empleadosConectado
 
         });
 
-        //CONECTAMOS AL USUARIO DEL SERVIDOR
-        socket.on('conectarusuario', function (data) {
-
-            if (data != null) {
-                empleadosConectados.push(data);
-
-                //Mandamos los usuarios que quedan
-                console.log("Empleado conectado");
-                console.log("Empleados conectados ahora: " + empleadosConectados.length);
-            }
-
-        });
-
         //DESCONECTAMOS AL USUARIO DEL SERVIDOR
         socket.on('desconectarusuario', function (data) {
+
+            if(data.tipoUsuario)
 
             for (var i = 0; i < empleadosConectados.length; i++) {
                 if (empleadosConectados[i].id == data.id) {
