@@ -45,7 +45,7 @@ exports = module.exports = function (io, idBusquedaCliente, empleadosConectados,
         socket.on('cancelarsolicitud', function (data) {
             if (data != null) {
                 socket.leave('transaccion-' + data.idBusquedaTransaccion);//Nos vamos del room
-                console.log("El cliente " + data.id + " ha cancelado la solicitud");
+                console.log("El cliente " + data.clienteTransaccion.id + " ha cancelado la solicitud");
                 socket.broadcast.emit('solicitudcancelada', data);
 
             }

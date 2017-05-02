@@ -115,12 +115,12 @@ exports = module.exports = function (io, idClienteDisponible, empleadosConectado
         //DESCONECTAMOS AL CLIENTE DEL SERVIDOR
         socket.on('desconectarclienteanonimo', function (data) {
 
-            for (var i = 0; i < clientesConectados.length; i++) {
-                if (clientesConectados[i].id == data.id) {
-                    clientesConectados.splice(i, 1);//Sacamos el cliente de conectados
+            for (var i = 0; i < clientesAnonimosConectados.length; i++) {
+                if (clientesAnonimosConectados[i].id == data.id) {
+                    clientesAnonimosConectados.splice(i, 1);//Sacamos el cliente de conectados
                     //Mandamos los usuarios que quedan
-                    console.log("Cliente desconectado");
-                    console.log("Clientes conectados ahora: " + clientesConectados.length);
+                    console.log("Cliente Anonimo desconectado");
+                    console.log("Clientes Anonimos conectados ahora: " + clientesAnonimosConectados.length);
                     break;
                 }
 

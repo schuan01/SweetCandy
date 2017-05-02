@@ -25,7 +25,7 @@ exports = module.exports = function (io) {
         socket.on('getfotosusuario', function (data) {
             bd.getConnection(function (err, connection) {
                 if (err) throw err;
-                connection.query('SELECT * FROM FotosUsuario WHERE empleadoFoto = ?', [data.id], function (error, results, fields) {
+                connection.query('SELECT * FROM FotosUsuario WHERE usuarioFoto = ?', [data.id], function (error, results, fields) {
                     if (error) throw error;
                     connection.release();
                     var fotos = [];
