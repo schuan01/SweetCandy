@@ -32,4 +32,9 @@ Extras:
 
 - El servidor podra enviar notificaciones Push a todos sus usuarios por algun tipo de notificacion.
 - Buscando un servicio desplegara una notificacion de "Buscando..." y se podra salir de la app mientras se corre en segundo plano.
--
+
+
+
+//TODO
+- El servidor tiene que manejar el encriptado de la password.
+- La constante concatenada al password debe ser en el server
